@@ -1,0 +1,29 @@
+#!/bin/bash
+# bash programmable completion for xc
+
+have xc &&
+_xc()
+{
+    local cur prev
+
+    COMPREPLY=()
+    _get_comp_words_by_ref cur prev
+
+    case $prev in
+        -v)
+            VERS=( $( grep -A 1 CFBundleShortVersionString /Applications/Xcode*.app/Contents/version.plist | sed -n 's/.*<string\>\(.*\)\<\/string>/\1/p') )
+            COMPREPLY=( $( compgen -W '${VERS[@]}' -- "$cur" ) )
+            return 0
+            ;;
+    esac
+
+    # completing an option (may or may not be separated by a space)
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $( compgen -W '-v' -- "$cur" ) )
+    else
+        _filedir -d
+    fi
+
+    return 0
+} &&
+complete -F _xc -o default xc

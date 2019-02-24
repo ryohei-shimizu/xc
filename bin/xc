@@ -1,0 +1,29 @@
+#!/bin/bash -eu
+
+# open Xcode with version specification
+XCODE="/Applications/Xcode.app"
+
+while getopts v: OPT
+do
+    case $OPT in
+        v)
+            APP=""
+            for APP in $( grep -l CFBundleShortVersionString /Applications/Xcode*.app/Contents/version.plist | sed 's/\(.*\.app\).*/\1/' )
+            do
+                if grep -A 1 CFBundleShortVersionString $APP/Contents/version.plist | grep -q $OPTARG; then
+                    XCODE=$APP
+                    break
+                fi
+            done
+            unset APP
+            ;;
+        ?)
+            printf "Usage: %s: [-v <version>] <directory>\n" $0
+            exit 2
+            ;;
+    esac
+done
+shift $(($OPTIND - 1))
+
+open -a $XCODE $@
+unset XCODE
